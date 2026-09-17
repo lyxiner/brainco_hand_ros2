@@ -14,6 +14,9 @@
 
 #include "brainco_hand_driver/transport_session_base.hpp"
 
+#include <chrono>
+#include <thread>
+
 #include "brainco_hand_driver/logger_macros.hpp"
 #include "brainco_hand_driver/sdk_helpers.hpp"
 
@@ -69,6 +72,31 @@ bool SessionBase::set_finger_positions(
 
   ::stark_set_finger_positions(handler_, slave_id, positions, count);
   return true;
+}
+
+bool SessionBase::set_finger_protected_current(
+  uint8_t slave_id, std::size_t finger_index, uint16_t current_ma)
+{
+  if (!handler_ || finger_index >= BraincoHandApi::kFingerCount) {
+    return false;
+  }
+
+  const auto finger_id = static_cast<StarkFingerId>(finger_index + 1U);
+  const auto current_value = ::stark_get_finger_protected_current(handler_, slave_id, finger_id);
+  if (current_value == current_ma) {
+    return true;
+  }
+
+  ::stark_set_finger_protected_current(handler_, slave_id, finger_id, current_ma);
+  constexpr std::size_t kReadbackAttempts{3};
+  constexpr auto kReadbackDelay = std::chrono::milliseconds{100};
+  for (std::size_t attempt = 0; attempt < kReadbackAttempts; ++attempt) {
+    std::this_thread::sleep_for(kReadbackDelay);
+    if (::stark_get_finger_protected_current(handler_, slave_id, finger_id) == current_ma) {
+      return true;
+    }
+  }
+  return false;
 }
 
 void SessionBase::set_handler(DeviceHandler * handler) {handler_ = handler;}

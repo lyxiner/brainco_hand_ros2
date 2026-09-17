@@ -2,7 +2,7 @@
 
 这是一个面向 ROS 2 Humble 的精简驱动，仅用于通过 RS-485 Modbus RTU 控制一只 BrainCo Revo1 右手。驱动接入 `ros2_control`，提供六个主动关节的位置控制和位置反馈。
 
-不包含 Revo2、右手、CAN/CANFD、EtherCAT、触觉、Gazebo、MoveIt 或机械臂集成功能。
+不包含 Revo2、左手、CAN/CANFD、EtherCAT、触觉、Gazebo、MoveIt 或机械臂集成功能。
 
 ## 环境与硬件
 
@@ -45,9 +45,12 @@ hardware:
   auto_detect: true
   auto_detect_quick: true
   auto_detect_port: /dev/ttyUSB0
+  index_protected_current_ma: 650
 ```
 
-默认只在 `/dev/ttyUSB0` 上自动检测，并在瞬时通信失败时重试三次。如果设备节点不同，请同时修改 `port` 和 `auto_detect_port`；将 `auto_detect_port` 留空会扫描所有串口。如果自动检测不可用，将 `auto_detect` 改为 `false`，驱动会直接使用 `port`、`baudrate` 和 `slave_id`。
+默认只在 `/dev/ttyUSB0` 上自动检测，并在瞬时通信失败时最多重试五次。如果设备节点不同，请同时修改 `port` 和 `auto_detect_port`；将 `auto_detect_port` 留空会扫描所有串口。如果自动检测不可用，将 `auto_detect` 改为 `false`，驱动会直接使用 `port`、`baudrate` 和 `slave_id`。
+
+`index_protected_current_ma` 设置食指堵转保护电流，允许范围为 `100~1500 mA`，出厂默认值为 `500 mA`。勾弦场景默认使用较保守的 `650 mA`；如果仍在接触弦时停止，可每次增加 `50 mA` 短时测试，不建议在未监测温升的情况下超过 `800 mA`。应调整手指与琴弦的位置，使指尖越过琴弦后能够释放，避免持续堵转。
 
 ## 启动
 
@@ -58,6 +61,7 @@ ros2 launch brainco_hand_driver revo1_right_system.launch.py
 
 启动后会加载：
 
+- `/right_revo1_hand/controller_manager`
 - `joint_state_broadcaster`
 - `right_revo1_hand_position_controller`
 
@@ -65,7 +69,7 @@ Modbus 控制循环固定为 20 Hz，与 Revo1 官方 SDK 示例的 50 ms 通信
 
 ## 控制手指
 
-控制话题为 `/right_revo1_hand_position_controller/commands`，消息类型为 `std_msgs/msg/Float64MultiArray`。
+控制话题为 `/right_revo1_hand/right_revo1_hand_position_controller/commands`，消息类型为 `std_msgs/msg/Float64MultiArray`。
 
 六个值按以下顺序排列，单位是弧度：
 
@@ -82,7 +86,7 @@ Modbus 控制循环固定为 20 Hz，与 Revo1 官方 SDK 示例的 50 ms 通信
 
 ```bash
 ros2 topic pub --once \
-  /right_revo1_hand_position_controller/commands \
+  /right_revo1_hand/right_revo1_hand_position_controller/commands \
   std_msgs/msg/Float64MultiArray \
   "{data: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}"
 ```
@@ -91,7 +95,7 @@ ros2 topic pub --once \
 
 ```bash
 ros2 topic pub --once \
-  /right_revo1_hand_position_controller/commands \
+  /right_revo1_hand/right_revo1_hand_position_controller/commands \
   std_msgs/msg/Float64MultiArray \
   "{data: [0.48, 0.78, 0.61, 0.61, 0.61, 0.61]}"
 ```
@@ -100,15 +104,76 @@ ros2 topic pub --once \
 
 ```bash
 ros2 topic pub --once \
-  /right_revo1_hand_position_controller/commands \
+  /right_revo1_hand/right_revo1_hand_position_controller/commands \
   std_msgs/msg/Float64MultiArray \
   "{data: [0.95, 1.55, 1.20, 1.20, 1.20, 1.20]}"
 ```
 
-位置反馈可从 `/joint_states` 读取：
+位置反馈可从 `/right_revo1_hand/joint_states` 读取：
 
 ```bash
-ros2 topic echo /joint_states
+ros2 topic echo /right_revo1_hand/joint_states
+```
+
+### 食指快速往复
+
+以下命令使用同一个 ROS 2 发布器，使食指在 `0.0` 和 `0.5 rad` 之间快速往复。单程等待时间为 `0.30 s`；按 `Ctrl+C` 停止并回到 `0.0`。
+
+```bash
+source /opt/ros/humble/setup.bash
+source /home/wz/ROS2/Brainco/revo1_ros2_ws/install/setup.bash
+
+python3 - <<'PY'
+import time
+
+import rclpy
+from rclpy.node import Node
+from std_msgs.msg import Float64MultiArray
+
+rclpy.init()
+node = Node("fast_index_motion")
+publisher = node.create_publisher(
+    Float64MultiArray,
+    "/right_revo1_hand/right_revo1_hand_position_controller/commands",
+    10,
+)
+
+while publisher.get_subscription_count() == 0:
+    rclpy.spin_once(node, timeout_sec=0.1)
+
+try:
+    while True:
+        publisher.publish(
+            Float64MultiArray(data=[0.0, 0.0, 0.5, 0.0, 0.0, 0.0])
+        )
+        time.sleep(0.30)
+        publisher.publish(
+            Float64MultiArray(data=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+        )
+        time.sleep(0.30)
+except KeyboardInterrupt:
+    publisher.publish(
+        Float64MultiArray(data=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+    )
+    time.sleep(0.2)
+finally:
+    node.destroy_node()
+    rclpy.shutdown()
+PY
+```
+
+### 手腕到指尖接口
+
+当前精简驱动不发布手腕到指尖的笛卡尔位姿话题，也不发布 `/tf`。可用的手指状态接口只有：
+
+```text
+/right_revo1_hand/joint_states    sensor_msgs/msg/JointState
+```
+
+其中食指关节名为 `right_index_flex_joint`。现有 URDF 仅用于 `ros2_control`，没有真实指骨长度和指尖几何，因此不能从它计算可信的手腕到指尖坐标。后续接入完整手部 URDF 和 `robot_state_publisher` 后，应通过 `/tf` 查询手腕坐标系到指尖坐标系的变换，而不是新建重复的位姿话题，例如：
+
+```bash
+ros2 run tf2_ros tf2_echo <wrist_frame> <index_fingertip_frame>
 ```
 
 ## 测试

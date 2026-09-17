@@ -40,6 +40,7 @@ def test_revo1_modbus_defaults():
     assert config["baudrate"] == 115200
     assert config["auto_detect"] is True
     assert config["auto_detect_port"] == "/dev/ttyUSB0"
+    assert config["index_protected_current_ma"] == 650
 
     limits = [float(value) for value in config["joint_max_positions_rad"].split(",")]
     assert len(limits) == 6
@@ -48,7 +49,10 @@ def test_revo1_modbus_defaults():
     controllers = yaml.safe_load(
         (CONFIG_DIR / "revo1_right_controllers.yaml").read_text(encoding="utf-8")
     )
-    assert controllers["controller_manager"]["ros__parameters"]["update_rate"] == 20
+    manager_parameters = controllers["/right_revo1_hand/controller_manager"][
+        "ros__parameters"
+    ]
+    assert manager_parameters["update_rate"] == 20
 
 
 def test_revo1_xacro_exports_six_position_joints():
@@ -76,3 +80,4 @@ def test_revo1_xacro_exports_six_position_joints():
     }
     assert "device_model" not in parameters
     assert "protocol" not in parameters
+    assert "index_protected_current_ma" in parameters

@@ -55,6 +55,7 @@ private:
   {
     BraincoHandApi::DriverConfig transport{};
     std::vector<double> joint_max_positions_rad{};
+    uint16_t index_protected_current_ma{650};
   };
 
   auto init_parameters() -> hardware_interface::CallbackReturn;

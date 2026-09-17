@@ -17,8 +17,7 @@
 """Start the minimal ros2_control system for one Revo1 right hand."""
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, RegisterEventHandler
-from launch.event_handlers import OnProcessExit
+from launch.actions import DeclareLaunchArgument
 from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
@@ -57,24 +56,28 @@ def generate_launch_description():
     control_node = Node(
         package="controller_manager",
         executable="ros2_control_node",
+        namespace="right_revo1_hand",
         parameters=[robot_description, controllers_file],
         output="both",
     )
-    joint_state_broadcaster = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["joint_state_broadcaster", "-c", "/controller_manager"],
-        output="both",
-    )
-    position_controller = Node(
+    controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
         arguments=[
+            "joint_state_broadcaster",
             "right_revo1_hand_position_controller",
             "-c",
-            "/controller_manager",
+            "/right_revo1_hand/controller_manager",
+            "-n",
+            "/right_revo1_hand",
             "-p",
             controllers_file,
+            "--controller-manager-timeout",
+            "20",
+            "--service-call-timeout",
+            "10",
+            "--switch-timeout",
+            "10",
         ],
         output="both",
     )
@@ -87,12 +90,6 @@ def generate_launch_description():
                 description="Revo1 Modbus hardware configuration YAML file",
             ),
             control_node,
-            joint_state_broadcaster,
-            RegisterEventHandler(
-                OnProcessExit(
-                    target_action=joint_state_broadcaster,
-                    on_exit=[position_controller],
-                )
-            ),
+            controller_spawner,
         ]
     )

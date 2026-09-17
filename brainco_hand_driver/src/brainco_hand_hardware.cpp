@@ -31,6 +31,7 @@ namespace brainco_hand_driver
 namespace
 {
 constexpr std::size_t kFingerCount{BraincoHandApi::kFingerCount};
+constexpr std::size_t kIndexFingerIndex{2};
 constexpr double kDevicePositionMax{1000.0};
 }  // namespace
 
@@ -198,6 +199,13 @@ auto BraincoHandHardware::init_parameters() -> hardware_interface::CallbackRetur
     config_.transport.modbus.auto_detect_port = get_parameter("auto_detect_port", "");
     config_.joint_max_positions_rad =
       parse_double_list(get_parameter("joint_max_positions_rad", ""));
+    const auto index_protected_current =
+      std::stoul(get_parameter("index_protected_current_ma", "650"));
+    if (index_protected_current < 100 || index_protected_current > 1500) {
+      BRAINCO_HAND_LOG_ERROR("index_protected_current_ma must be in [100, 1500]");
+      return hardware_interface::CallbackReturn::ERROR;
+    }
+    config_.index_protected_current_ma = static_cast<uint16_t>(index_protected_current);
   } catch (const std::exception & error) {
     BRAINCO_HAND_LOG_ERROR("Invalid hardware parameter: %s", error.what());
     return hardware_interface::CallbackReturn::ERROR;
@@ -257,6 +265,18 @@ auto BraincoHandHardware::open_connection() -> bool
     BRAINCO_HAND_LOG_INFO(
       "Connected: port=%s baudrate=%u slave_id=%u", resolved_connection_->port.c_str(),
       resolved_connection_->baudrate, resolved_connection_->slave_id);
+  }
+
+  if (!api_.set_finger_protected_current(
+      config_.transport.slave_id, kIndexFingerIndex, config_.index_protected_current_ma))
+  {
+    BRAINCO_HAND_LOG_WARN(
+      "Could not verify index-finger protection current at %u mA; continuing with the "
+      "device's current protection setting",
+      config_.index_protected_current_ma);
+  } else {
+    BRAINCO_HAND_LOG_INFO(
+      "Index-finger protection current: %u mA", config_.index_protected_current_ma);
   }
 
   BraincoHandApi::DeviceInfoData device_info{};

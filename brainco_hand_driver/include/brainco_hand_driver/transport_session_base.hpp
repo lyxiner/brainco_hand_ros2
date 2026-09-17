@@ -30,6 +30,8 @@ public:
   std::optional<BraincoHandApi::MotorStatus> get_motor_status(uint8_t slave_id) const override;
   bool set_finger_positions(
     uint8_t slave_id, const uint16_t * positions, std::size_t count) override;
+  bool set_finger_protected_current(
+    uint8_t slave_id, std::size_t finger_index, uint16_t current_ma) override;
 
 protected:
   void set_handler(DeviceHandler * handler);

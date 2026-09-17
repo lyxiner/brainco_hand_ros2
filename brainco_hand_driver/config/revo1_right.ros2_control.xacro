@@ -17,6 +17,7 @@
         <xacro:if value="${hardware_config['auto_detect_port'] != ''}">
           <param name="auto_detect_port">${hardware_config['auto_detect_port']}</param>
         </xacro:if>
+        <param name="index_protected_current_ma">${hardware_config['index_protected_current_ma']}</param>
         <param name="joint_max_positions_rad">${hardware_config['joint_max_positions_rad']}</param>
       </hardware>
 

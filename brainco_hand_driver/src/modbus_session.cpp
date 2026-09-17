@@ -27,8 +27,8 @@ namespace brainco_hand_driver
 
 namespace
 {
-constexpr std::size_t kAutoDetectAttempts{3};
-constexpr auto kAutoDetectRetryDelay = std::chrono::milliseconds{100};
+constexpr std::size_t kAutoDetectAttempts{5};
+constexpr auto kAutoDetectRetryDelay = std::chrono::milliseconds{500};
 }  // namespace
 
 ModbusSession::ModbusSession(BraincoHandApi::DriverConfig & config)

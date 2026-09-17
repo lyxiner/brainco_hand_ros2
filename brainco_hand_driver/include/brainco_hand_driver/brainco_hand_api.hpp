@@ -91,6 +91,8 @@ public:
     [[nodiscard]] virtual std::optional<MotorStatus> get_motor_status(uint8_t slave_id) const = 0;
     virtual bool set_finger_positions(
       uint8_t slave_id, const uint16_t * positions, std::size_t count) = 0;
+    virtual bool set_finger_protected_current(
+      uint8_t slave_id, std::size_t finger_index, uint16_t current_ma) = 0;
   };
 
   BraincoHandApi();
@@ -110,6 +112,8 @@ public:
   auto get_motor_status(uint8_t slave_id) const -> std::optional<MotorStatus>;
   auto set_finger_positions(
     uint8_t slave_id, const uint16_t * positions, std::size_t count) -> bool;
+  auto set_finger_protected_current(
+    uint8_t slave_id, std::size_t finger_index, uint16_t current_ma) -> bool;
   [[nodiscard]] auto resolved_connection() const -> std::optional<ConnectionInfo>;
 
 private:

@@ -102,6 +102,13 @@ auto BraincoHandApi::set_finger_positions(
          impl_->session->set_finger_positions(slave_id, positions, count);
 }
 
+auto BraincoHandApi::set_finger_protected_current(
+  uint8_t slave_id, std::size_t finger_index, uint16_t current_ma) -> bool
+{
+  return impl_ && impl_->session &&
+         impl_->session->set_finger_protected_current(slave_id, finger_index, current_ma);
+}
+
 auto BraincoHandApi::resolved_connection() const -> std::optional<ConnectionInfo>
 {
   if (!impl_ || !impl_->session) {
