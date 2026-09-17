@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="revo1_right_ros2_control" params="name protocol_config_file">
+    <xacro:property
+      name="hardware_config"
+      value="${xacro.load_yaml(protocol_config_file)['hardware']}"/>
+
+    <ros2_control name="${name}" type="system">
+      <hardware>
+        <plugin>brainco_hand_driver/BraincoHandHardware</plugin>
+        <param name="slave_id">${hardware_config['slave_id']}</param>
+        <param name="log_level">${hardware_config['log_level']}</param>
+        <param name="port">${hardware_config['port']}</param>
+        <param name="baudrate">${hardware_config['baudrate']}</param>
+        <param name="auto_detect">${hardware_config['auto_detect']}</param>
+        <param name="auto_detect_quick">${hardware_config['auto_detect_quick']}</param>
+        <xacro:if value="${hardware_config['auto_detect_port'] != ''}">
+          <param name="auto_detect_port">${hardware_config['auto_detect_port']}</param>
+        </xacro:if>
+        <param name="joint_max_positions_rad">${hardware_config['joint_max_positions_rad']}</param>
+      </hardware>
+
+      <joint name="right_thumb_flex_joint">
+        <command_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+      </joint>
+      <joint name="right_thumb_abduction_joint">
+        <command_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+      </joint>
+      <joint name="right_index_flex_joint">
+        <command_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+      </joint>
+      <joint name="right_middle_flex_joint">
+        <command_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+      </joint>
+      <joint name="right_ring_flex_joint">
+        <command_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+      </joint>
+      <joint name="right_pinky_flex_joint">
+        <command_interface name="position"/>
+        <state_interface name="position">
+          <param name="initial_value">0.0</param>
+        </state_interface>
+      </joint>
+    </ros2_control>
+  </xacro:macro>
+</robot>

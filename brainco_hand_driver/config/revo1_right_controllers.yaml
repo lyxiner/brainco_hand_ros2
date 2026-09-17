@@ -1,0 +1,21 @@
+controller_manager:
+  ros__parameters:
+    # The official SDK interactive example uses a 50 ms Modbus cycle (20 Hz).
+    update_rate: 20
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    right_revo1_hand_position_controller:
+      type: position_controllers/JointGroupPositionController
+
+right_revo1_hand_position_controller:
+  ros__parameters:
+    joints:
+      - right_thumb_flex_joint
+      - right_thumb_abduction_joint
+      - right_index_flex_joint
+      - right_middle_flex_joint
+      - right_ring_flex_joint
+      - right_pinky_flex_joint
+    interface_name: position

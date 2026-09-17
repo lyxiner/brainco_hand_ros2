@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="revo1_right">
+  <xacro:arg
+    name="protocol_config_file"
+    default="$(find brainco_hand_driver)/config/protocol_modbus_revo1_right.yaml"/>
+
+  <!-- Minimal kinematic model for ros2_control. Revo1 has six active motors. -->
+  <link name="right_revo1_base_link"/>
+
+  <xacro:macro name="active_joint" params="name child max_position axis:='0 0 1'">
+    <link name="${child}"/>
+    <joint name="${name}" type="revolute">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <parent link="right_revo1_base_link"/>
+      <child link="${child}"/>
+      <axis xyz="${axis}"/>
+      <limit lower="0.0" upper="${max_position}" effort="1.0" velocity="2.0"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:active_joint
+    name="right_thumb_flex_joint"
+    child="right_thumb_flex_link"
+    max_position="0.9599310886"/>
+  <xacro:active_joint
+    name="right_thumb_abduction_joint"
+    child="right_thumb_abduction_link"
+    max_position="1.5707963268"
+    axis="0 1 0"/>
+  <xacro:active_joint
+    name="right_index_flex_joint"
+    child="right_index_flex_link"
+    max_position="1.2217304764"/>
+  <xacro:active_joint
+    name="right_middle_flex_joint"
+    child="right_middle_flex_link"
+    max_position="1.2217304764"/>
+  <xacro:active_joint
+    name="right_ring_flex_joint"
+    child="right_ring_flex_link"
+    max_position="1.2217304764"/>
+  <xacro:active_joint
+    name="right_pinky_flex_joint"
+    child="right_pinky_flex_link"
+    max_position="1.2217304764"/>
+
+  <xacro:include filename="revo1_right.ros2_control.xacro"/>
+  <xacro:revo1_right_ros2_control
+    name="Revo1RightSystem"
+    protocol_config_file="$(arg protocol_config_file)"/>
+</robot>

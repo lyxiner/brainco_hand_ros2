@@ -1,393 +1,150 @@
-# BrainCo Hand ROS2 Project
+# BrainCo Revo1 右手 ROS 2 驱动
 
-[English](README.md) | [简体中文](README_CN.md)
+这是一个面向 ROS 2 Humble 的精简驱动，仅用于通过 RS-485 Modbus RTU 控制一只 BrainCo Revo1 右手。驱动接入 `ros2_control`，提供六个主动关节的位置控制和位置反馈。
 
+不包含 Revo2、右手、CAN/CANFD、EtherCAT、触觉、Gazebo、MoveIt 或机械臂集成功能。
 
-## Project Overview
+## 环境与硬件
 
-BrainCo Hand ROS2 is a complete ROS 2 software package collection that provides a full solution for BrainCo Revo2 dexterous hand, from hardware drivers to simulation and motion planning. This project is developed based on ROS 2 Humble, supporting single-hand and dual-hand configurations, providing hardware control, Gazebo simulation, MoveIt motion planning, and other features.
+- Ubuntu 22.04
+- ROS 2 Humble
+- Revo1 右手
+- USB 转 RS-485 适配器
+- 默认串口参数：`115200` baud、从站 ID `1`
 
-### Key Features
-
-- **Complete Hardware Driver Support**: Supports Modbus, CAN FD, and EtherCAT communication protocols
-- **ros2_control Integration**: Complete ros2_control hardware interface implementation
-- **Gazebo Simulation Environment**: High-fidelity physics simulation based on Ignition Gazebo 6
-- **MoveIt Motion Planning**: Complete MoveIt 2 integration supporting advanced motion planning
-- **Real-time Control**: High-frequency control loop for precise finger manipulation
-- **Dual-hand Support**: Supports left hand, right hand, and simultaneous dual-hand control
-- **Robot Arm Integration**: Provides RM65 robot arm integration demo with Revo2 dexterous hand
-
-## System Requirements
-
-### Basic Environment
-
-- **Operating System**: Ubuntu 22.04
-- **ROS Version**: ROS 2 Humble
-- **Python Version**: Python 3.8+
-
-### Hardware Requirements (Hardware Control Mode)
-
-#### Modbus Mode (Default)
-- Modbus serial device (e.g., `/dev/ttyUSB0`)
-- Serial port permission configuration (user must be in `dialout` group)
-
-#### CAN FD Mode (Optional)
-- ZLG USB-CAN FD device (e.g., USBCANFD-200U)
-- CAN FD bus connection
-
-#### EtherCAT Mode (Optional)
-- EtherCAT Master (IgH EtherCAT Master)
-- EtherCAT master service configuration (`ethercat` system service)
-
-### Simulation Environment Requirements
-
-- **Gazebo**: Ignition Gazebo 6 (for simulation packages)
-- **MoveIt 2**: For motion planning packages
-
-## Project Structure
-
-This project contains the following main packages:
-
-```
-brainco_hand_ros2/
-├── revo2_description/                    # Revo2 dexterous hand URDF description package
-├── brainco_hardware/                     # Hardware driver packages
-│   ├── brainco_hand_driver/            # Revo2 dexterous hand hardware driver
-│   └── stark_ethercat/brainco_hand_ethercat_driver/                  # EtherCAT driver
-├── brainco_gazebo/                      # Gazebo simulation package
-├── brainco_moveit_config/               # MoveIt configuration package
-└── revo2_with_rm65_demo/                # RM65 robot arm integration demo
-    ├── gazebo_rm_65_6f_with_revo2_demo/ # RM65+Revo2 Gazebo simulation
-    └── rm65_with_revo2_right_moveit_config/ # RM65+Revo2 MoveIt configuration
-```
-
-## Package Descriptions
-
-### 1. revo2_description
-
-**Function**: URDF model description package for Revo2 dexterous hand, providing 3D visualization of the robot model.
-
-**Key Features**:
-- Left and right hand URDF models
-- RViz visualization support
-- Complete joint and link definitions
-
-**Detailed Documentation**: Please refer to [revo2_description/README_CN.md](revo2_description/README_CN.md)
-
-### 2. brainco_hardware
-
-**Function**: Hardware driver package for Revo2 dexterous hand, providing ros2_control-based hardware interface.
-
-**Key Features**:
-- Supports Modbus, CAN FD, and EtherCAT communication protocols
-- Complete ros2_control hardware interface implementation
-- Supports single-hand and dual-hand configurations
-- MoveIt integration support
-- Real-time joint position and velocity feedback
-
-**Detailed Documentation**: Please refer to [brainco_hardware/brainco_hand_driver/README_CN.md](brainco_hardware/brainco_hand_driver/README_CN.md)
-
-**EtherCAT Detailed Documentation**: Please refer to [brainco_hardware/stark_ethercat/brainco_hand_ethercat_driver/README_CN.md](brainco_hardware/stark_ethercat/brainco_hand_ethercat_driver/README_CN.md)
-
-### 3. brainco_gazebo
-
-**Function**: Gazebo simulation package for Revo2 dexterous hand, providing complete physics simulation environment.
-
-**Key Features**:
-- Physics simulation based on Ignition Gazebo 6
-- Supports single-hand and dual-hand simulation
-- Gazebo-MoveIt integration
-- RViz visualization integration
-
-**Detailed Documentation**: Please refer to [brainco_gazebo/README_CN.md](brainco_gazebo/README_CN.md)
-
-### 4. brainco_moveit_config
-
-**Function**: MoveIt configuration package for Revo2 dexterous hand, providing motion planning functionality.
-
-**Key Features**:
-- Supports left hand, right hand, and dual-hand configurations
-- Complete MoveIt 2 integration
-- FakeSystem support
-
-**Detailed Documentation**: Please refer to [brainco_moveit_config/README_CN.md](brainco_moveit_config/README_CN.md)
-
-### 5. revo2_with_rm65_demo
-
-**Function**: Integration demo package for RM65 robot arm with Revo2 dexterous hand.
-
-**Sub-packages**:
-
-#### 5.1 gazebo_rm_65_6f_with_revo2_demo
-
-**Function**: Gazebo simulation for RM65 robot arm with Revo2 dexterous hand.
-
-**Detailed Documentation**: Please refer to [revo2_with_rm65_demo/gazebo_rm_65_6f_with_revo2_demo/README_CN.md](revo2_with_rm65_demo/gazebo_rm_65_6f_with_revo2_demo/README_CN.md)
-
-#### 5.2 rm65_with_revo2_right_moveit_config
-
-**Function**: MoveIt configuration for RM65 robot arm with Revo2 right hand.
-
-**Detailed Documentation**: Please refer to [revo2_with_rm65_demo/rm65_with_revo2_right_moveit_config/README_CN.md](revo2_with_rm65_demo/rm65_with_revo2_right_moveit_config/README_CN.md)
-
-## Quick Start
-
-### 1. Environment Setup
+确认当前用户有串口权限：
 
 ```bash
-# Check ROS 2 environment
-echo $ROS_DISTRO  # Should output: humble
-
-# Create workspace (if not already created)
-mkdir -p <workspace>/src
-cd <workspace>
+sudo usermod -aG dialout "$USER"
 ```
 
-**Note**: Please replace `<workspace>` with your workspace path, for example `~/brainco_ws`.
+执行后需要注销并重新登录。也可用 `ls -l /dev/ttyUSB*` 检查设备及权限。
 
-### 2. Clone Repository
+## 编译
+
+仓库应位于工作空间的 `src/brainco_hand_ros2`：
 
 ```bash
-# Enter workspace src directory
-cd <workspace>/src
-
-# Clone main repository
-git clone https://github.com/BrainCoTech/brainco_hand_ros2.git
-cd brainco_hand_ros2
-
-# Use vcs tool to clone dependency repositories
-vcs import . < brainco_hand.repos --recursive --skip-existing
+cd /home/wz/ROS2/Brainco/revo1_ros2_ws
+source /opt/ros/humble/setup.bash
+colcon build --packages-select brainco_hand_driver --symlink-install
+source install/setup.bash
 ```
 
-**Note**: If your system does not have the `vcs` tool installed, please install it first:
-```bash
-sudo apt-get install python3-vcstool
+驱动所需的 Stark SDK 头文件和 Linux 共享库已经放在包内，不需要另外下载。
+
+## 串口配置
+
+默认配置文件为 `brainco_hand_driver/config/protocol_modbus_revo1_right.yaml`。默认开启 Revo1 自动检测：
+
+```yaml
+hardware:
+  slave_id: 1
+  port: /dev/ttyUSB0
+  baudrate: 115200
+  auto_detect: true
+  auto_detect_quick: true
+  auto_detect_port: /dev/ttyUSB0
 ```
 
-### 3. Install Dependencies and Build
+默认只在 `/dev/ttyUSB0` 上自动检测，并在瞬时通信失败时重试三次。如果设备节点不同，请同时修改 `port` 和 `auto_detect_port`；将 `auto_detect_port` 留空会扫描所有串口。如果自动检测不可用，将 `auto_detect` 改为 `false`，驱动会直接使用 `port`、`baudrate` 和 `slave_id`。
+
+## 启动
 
 ```bash
-# Return to workspace root directory
-cd <workspace>
-
-# Update package list
-sudo apt-get update
-
-# Update rosdep database
-rosdep update
-
-# Install all dependencies
-rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO -y
-
+source /home/wz/ROS2/Brainco/revo1_ros2_ws/install/setup.bash
+ros2 launch brainco_hand_driver revo1_right_system.launch.py
 ```
 
-#### Build
+启动后会加载：
 
-**Method 1: Using Build Script (Recommended, Simple and Convenient)**
+- `joint_state_broadcaster`
+- `right_revo1_hand_position_controller`
+
+Modbus 控制循环固定为 20 Hz，与 Revo1 官方 SDK 示例的 50 ms 通信周期一致。相同目标不会重复下发，以减少 RTU 总线负载和解码报错。
+
+## 控制手指
+
+控制话题为 `/right_revo1_hand_position_controller/commands`，消息类型为 `std_msgs/msg/Float64MultiArray`。
+
+六个值按以下顺序排列，单位是弧度：
+
+| 索引 | 关节 | 范围 |
+| --- | --- | --- |
+| 0 | 拇指弯曲 | 0 ～ 0.9599 rad（55°） |
+| 1 | 拇指侧摆 | 0 ～ 1.5708 rad（90°） |
+| 2 | 食指弯曲 | 0 ～ 1.2217 rad（70°） |
+| 3 | 中指弯曲 | 0 ～ 1.2217 rad（70°） |
+| 4 | 无名指弯曲 | 0 ～ 1.2217 rad（70°） |
+| 5 | 小指弯曲 | 0 ～ 1.2217 rad（70°） |
+
+完全张开：
 
 ```bash
-# Default build (CAN FD and EtherCAT disabled)
-./build.sh
-
-# Enable CAN FD support
-./build.sh --canfd
-
-# Enable EtherCAT support
-./build.sh --ethercat
-
-# Enable both CAN FD and EtherCAT
-./build.sh --canfd --ethercat
-
-# Release mode build
-./build.sh --release
-
-# Release mode with all features enabled
-./build.sh --release --canfd --ethercat
-
-# Show help information
-./build.sh --help
+ros2 topic pub --once \
+  /right_revo1_hand_position_controller/commands \
+  std_msgs/msg/Float64MultiArray \
+  "{data: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}"
 ```
 
-**Method 2: Using colcon Commands**
+约半握拳：
 
 ```bash
-# Default build (CAN FD and EtherCAT disabled)
-colcon build --symlink-install --packages-ignore stark_ethercat_interface stark_ethercat_driver brainco_hand_ethercat_driver
-
-# Enable CAN FD support
-colcon build --symlink-install --cmake-args -DENABLE_CANFD=ON --packages-ignore stark_ethercat_interface stark_ethercat_driver brainco_hand_ethercat_driver
-
-# Enable EtherCAT support
-colcon build --symlink-install
-
-# Build brainco_hand_driver package only (default Modbus)
-colcon build --packages-up-to brainco_hand_driver --symlink-install
+ros2 topic pub --once \
+  /right_revo1_hand_position_controller/commands \
+  std_msgs/msg/Float64MultiArray \
+  "{data: [0.48, 0.78, 0.61, 0.61, 0.61, 0.61]}"
 ```
 
-**Notes:**
-- Enabling CAN FD support requires ZLG USB-CAN FD driver library, please ensure it is correctly placed in `brainco_hardware/brainco_hand_driver/vendor/usbcanfd_xxx/` directory
-- If CAN FD support is not enabled, launching nodes with CAN FD protocol will cause errors
-- If EtherCAT support is disabled, launching nodes with EtherCAT protocol will cause errors (packages not found)
-- Default configuration (CAN FD and EtherCAT disabled) can use Modbus protocol normally
-- If you need to use CAN FD or EtherCAT protocol, please enable them through corresponding parameters during build
-
-## Usage Scenarios
-
-### Scenario 1: Hardware Control (Real Dexterous Hand)
-
-If you have real Revo2 dexterous hand hardware, you can use `brainco_hand_driver` for control:
+接近完全弯曲：
 
 ```bash
-# Launch right hand system (Modbus mode)
-ros2 launch brainco_hand_driver revo2_system.launch.py hand_type:=right
-
-# Launch dual-hand system (Modbus mode)
-ros2 launch brainco_hand_driver dual_revo2_system.launch.py
-
-# Launch right hand system (with MoveIt)
-ros2 launch brainco_moveit_config revo2_real_moveit.launch.py hand_type:=right
-
-# Launch dual-hand system
-ros2 launch brainco_moveit_config dual_revo2_real_moveit.launch.py
+ros2 topic pub --once \
+  /right_revo1_hand_position_controller/commands \
+  std_msgs/msg/Float64MultiArray \
+  "{data: [0.95, 1.55, 1.20, 1.20, 1.20, 1.20]}"
 ```
 
-**Detailed Instructions**: Please refer to [brainco_hardware/brainco_hand_driver/README_CN.md](brainco_hardware/brainco_hand_driver/README_CN.md)
-
-### Scenario 2: Gazebo Simulation
-
-If you want to develop and test without hardware, you can use Gazebo simulation:
+位置反馈可从 `/joint_states` 读取：
 
 ```bash
-# Launch single-hand simulation
-ros2 launch brainco_gazebo revo2_hand_gazebo.launch.py hand_type:=right
-
-# Launch dual-hand simulation
-ros2 launch brainco_gazebo dual_revo2_hand_gazebo.launch.py
-
-# Launch simulation with MoveIt
-ros2 launch brainco_gazebo revo2_hand_gazebo_moveit.launch.py hand_type:=right
-```
-
-**Detailed Instructions**: Please refer to [brainco_gazebo/README_CN.md](brainco_gazebo/README_CN.md)
-
-### Scenario 3: MoveIt Motion Planning (No Hardware)
-
-If you want to use MoveIt for motion planning but don't need hardware or simulation, you can use FakeSystem:
-
-```bash
-# Launch right hand MoveIt (FakeSystem)
-ros2 launch brainco_moveit_config revo2_right_moveit.launch.py
-
-# Launch dual-hand MoveIt (FakeSystem)
-ros2 launch brainco_moveit_config dual_revo2_moveit.launch.py
-```
-
-**Detailed Instructions**: Please refer to [brainco_moveit_config/README_CN.md](brainco_moveit_config/README_CN.md)
-
-### Scenario 4: Robot Arm Integration Demo (FakeSystem)
-
-If you want to test the integration of RM65 robot arm with Revo2 dexterous hand:
-
-```bash
-# Launch Gazebo simulation
-ros2 launch gazebo_rm_65_6f_with_revo2_demo gazebo_rm_65_6f_with_revo2.launch.py
-
-# Launch MoveIt configuration (FakeSystem)
-ros2 launch rm65_with_revo2_right_moveit_config rm65_with_revo2_right_moveit.launch.py
-```
-
-**Detailed Instructions**:
-- [revo2_with_rm65_demo/gazebo_rm_65_6f_with_revo2_demo/README_CN.md](revo2_with_rm65_demo/gazebo_rm_65_6f_with_revo2_demo/README_CN.md)
-- [revo2_with_rm65_demo/rm65_with_revo2_right_moveit_config/README_CN.md](revo2_with_rm65_demo/rm65_with_revo2_right_moveit_config/README_CN.md)
-
-## Dual-hand MoveIt Simulation Demo
-
-![Demo](doc/dual_hand_gazebo_moveit.gif)
-
-## Control Interfaces
-
-### Topic Interfaces
-
-All packages provide standard ROS 2 Topic interfaces:
-
-- **Joint States**: `/joint_states` (sensor_msgs/JointState)
-- **Trajectory Commands**: `/xxx_revo2_hand_controller/joint_trajectory` (trajectory_msgs/JointTrajectory)
-
-### Action Interfaces
-
-- **Trajectory Execution**: `/xxx_revo2_hand_controller/follow_joint_trajectory` (control_msgs/action/FollowJointTrajectory)
-
-### Control Examples
-
-#### Right Hand Open Palm
-
-```bash
-ros2 topic pub --once /right_revo2_hand_controller/joint_trajectory \
-  trajectory_msgs/msg/JointTrajectory \
-  '{
-    joint_names: [
-      "right_thumb_proximal_joint",
-      "right_thumb_metacarpal_joint",
-      "right_index_proximal_joint",
-      "right_middle_proximal_joint",
-      "right_ring_proximal_joint",
-      "right_pinky_proximal_joint"
-    ],
-    points: [{
-      positions: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-      time_from_start: {sec: 1}
-    }]
-  }'
-```
-
-#### Right Hand Make Fist
-
-```bash
-ros2 topic pub --once /right_revo2_hand_controller/joint_trajectory \
-  trajectory_msgs/msg/JointTrajectory \
-  '{
-    joint_names: [
-      "right_thumb_proximal_joint",
-      "right_thumb_metacarpal_joint",
-      "right_index_proximal_joint",
-      "right_middle_proximal_joint",
-      "right_ring_proximal_joint",
-      "right_pinky_proximal_joint"
-    ],
-    points: [{
-      positions: [0.8, 0.1, 1.4, 1.4, 1.4, 1.4],
-      time_from_start: {sec: 2}
-    }]
-  }'
-```
-
-## Monitoring and Debugging
-
-### System Status Check
-
-```bash
-# List all running nodes
-ros2 node list
-
-# List all controllers
-ros2 control list_controllers
-
-# Check hardware components
-ros2 control list_hardware_components
-
-# Check hardware interfaces
-ros2 control list_hardware_interfaces
-
-# List all topics
-ros2 topic list
-
-# List all actions
-ros2 action list
-
-# Monitor joint states
 ros2 topic echo /joint_states
 ```
 
-## Contact
+## 测试
 
-For questions or suggestions, please contact the development team.
+```bash
+cd /home/wz/ROS2/Brainco/revo1_ros2_ws
+source /opt/ros/humble/setup.bash
+colcon test --packages-select brainco_hand_driver
+colcon test-result --verbose
+```
+
+## 常见问题
+
+出现 `Giving up to decode frame after 20 retries` 时，通常说明 RTU 通信受到干扰或串口被争用。当前配置已使用验证过的 20 Hz 周期并跳过重复命令；如果仍持续出现，请依次检查：
+
+1. 只有一个进程占用该串口。
+2. USB 转 RS-485 接线、终端和供电稳定。
+3. 波特率为 `115200`，从站 ID 与硬件一致。
+4. 当前用户属于 `dialout` 组。
+5. 将 `auto_detect_port` 固定为实际串口，避免扫描其他设备。
+
+偶发一两条解码日志但控制与反馈正常，通常不影响使用；持续高频出现并伴随动作或反馈中断时才需要排查通信链路。
+
+## 目录
+
+```text
+brainco_hand_ros2/
+├── README.md
+├── LICENSE
+└── brainco_hand_driver/
+    ├── config/       # Revo1 右手硬件、URDF 与控制器配置
+    ├── include/      # ros2_control 驱动头文件
+    ├── launch/       # 唯一启动文件
+    ├── src/          # Revo1 Modbus 驱动实现
+    ├── test/         # 配置与 xacro 测试
+    └── vendor/       # 必需的 Stark SDK
+```
+
+本项目采用 Apache-2.0 许可证。
